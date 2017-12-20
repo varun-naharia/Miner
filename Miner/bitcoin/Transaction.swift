@@ -70,7 +70,7 @@ class Transaction : DataObjectProtocol
             }
             
             // add magic, size, variable integers, and total lengths
-            return 0x8 + inputCount!.integerLength + outputCount!.integerLength + totalOutputLength + totalInputLength
+            return UInt64(0x8 + inputCount!.integerLength + outputCount!.integerLength + totalOutputLength + totalInputLength)
         }
     }
     

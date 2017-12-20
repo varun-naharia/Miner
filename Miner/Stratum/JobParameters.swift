@@ -32,15 +32,15 @@ class JobParameters
             let jobParameters = JobParameters()
             
             // parse array into job parameters
-            jobParameters.jobId = paramsArray[0] as String
-            jobParameters.previousHash = paramsArray[1] as String
-            jobParameters.coinb1 = paramsArray[2] as String
-            jobParameters.coinb2 = paramsArray[3] as String
-            jobParameters.merkleBranch = paramsArray[4] as [String]
-            jobParameters.version = paramsArray[5] as String
-            jobParameters.nbits = paramsArray[6] as String
-            jobParameters.ntime = paramsArray[7] as String
-            jobParameters.cleanJobs = paramsArray[8] as Bool
+            jobParameters.jobId = paramsArray[0] as! String
+            jobParameters.previousHash = paramsArray[1] as! String
+            jobParameters.coinb1 = paramsArray[2] as! String
+            jobParameters.coinb2 = paramsArray[3] as! String
+            jobParameters.merkleBranch = paramsArray[4] as! [String]
+            jobParameters.version = paramsArray[5] as! String
+            jobParameters.nbits = paramsArray[6] as! String
+            jobParameters.ntime = paramsArray[7] as! String
+            jobParameters.cleanJobs = paramsArray[8] as! Bool
             
             return jobParameters
         }

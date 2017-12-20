@@ -88,30 +88,30 @@ class DataBlock : DataObjectProtocol
                 switch dataSegment.type
                     {
                 case DataBlockSegmentType.SignedInt32:
-                    data.replaceBytesInRange(NSMakeRange(currentOffset, 0x4), withBytes: UnsafePointer<Int32>([dataSegment.signedInt32]))
+                    data!.replaceBytesInRange(NSMakeRange(currentOffset, 0x4), withBytes: UnsafePointer<Int32>([dataSegment.signedInt32]))
                     currentOffset += 0x4
                     break
                 case DataBlockSegmentType.UnsignedInt32:
-                    data.replaceBytesInRange(NSMakeRange(currentOffset, 0x4), withBytes: UnsafePointer<UInt32>([dataSegment.unsignedInt32]))
+                    data!.replaceBytesInRange(NSMakeRange(currentOffset, 0x4), withBytes: UnsafePointer<UInt32>([dataSegment.unsignedInt32]))
                     currentOffset += 0x4
                     break
                 case DataBlockSegmentType.SignedInt64:
-                    data.replaceBytesInRange(NSMakeRange(currentOffset, 0x8), withBytes: UnsafePointer<Int64>([dataSegment.signedInt64]))
+                    data!.replaceBytesInRange(NSMakeRange(currentOffset, 0x8), withBytes: UnsafePointer<Int64>([dataSegment.signedInt64]))
                     currentOffset += 0x8
                     break
                 case DataBlockSegmentType.UnsignedInt64:
-                    data.replaceBytesInRange(NSMakeRange(currentOffset, 0x8), withBytes: UnsafePointer<UInt64>([dataSegment.unsignedInt64]))
+                    data!.replaceBytesInRange(NSMakeRange(currentOffset, 0x8), withBytes: UnsafePointer<UInt64>([dataSegment.unsignedInt64]))
                     currentOffset += 0x8
                     break
                 case DataBlockSegmentType.Data, DataBlockSegmentType.DataObject:
                     let rawData = rawDataBlocks[currentDataIndex++]
-                    data.replaceBytesInRange(NSMakeRange(currentOffset, rawData.length), withBytes: rawData.bytes)
+                    data!.replaceBytesInRange(NSMakeRange(currentOffset, rawData.length), withBytes: rawData.bytes)
                     currentOffset += rawData.length
                     break
                 }
             }
             
-            return data
+            return data!
         }
     }
 }

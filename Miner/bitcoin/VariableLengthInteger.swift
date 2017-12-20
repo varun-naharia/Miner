@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum VariableLengthIntegerType : Byte
+enum VariableLengthIntegerType : UInt8
 {
     case UInt16 = 0xFD
     case UInt32 = 0xFE
@@ -27,23 +27,23 @@ struct VariableLengthInteger : DataObjectProtocol
     init(data: NSData, index: Int)
     {
         // get the type (int16, int32, int64)
-        var integerType: Byte = 0
+        var integerType: UInt8 = 0
         data.getBytes(&integerType, range: NSMakeRange(index, 1))
         
         // parse it based on its type
         switch integerType
         {
-        case VariableLengthIntegerType.UInt16.toRaw():
+        case VariableLengthIntegerType.UInt16.rawValue:
             var unsignedInt16: UInt16 = 0
             data.getBytes(&unsignedInt16, range: NSMakeRange(index + 1, 2))
             value = UInt64(unsignedInt16)
             break
-        case VariableLengthIntegerType.UInt32.toRaw():
+        case VariableLengthIntegerType.UInt32.rawValue:
             var unsignedInt32: UInt32 = 0
             data.getBytes(&unsignedInt32, range: NSMakeRange(index + 1, 4))
             value = UInt64(unsignedInt32)
             break
-        case VariableLengthIntegerType.UInt64.toRaw():
+        case VariableLengthIntegerType.UInt64.rawValue:
             var unsignedInt64: UInt64 = 0
             data.getBytes(&unsignedInt64, range: NSMakeRange(index + 1, 8))
             value = UInt64(unsignedInt64)
@@ -124,7 +124,7 @@ struct VariableLengthInteger : DataObjectProtocol
     {
         get
         {
-            var bytes: [Byte]
+            var bytes: [UInt8]
             var valueSize = self.integerLength
             
             // get the first value of the array
@@ -134,22 +134,22 @@ struct VariableLengthInteger : DataObjectProtocol
             }
             else if value <= 0xFFFF
             {
-                bytes = [VariableLengthIntegerType.UInt16.toRaw()]
+                bytes = [VariableLengthIntegerType.UInt16.rawValue]
             }
             else if value <= 0xFFFFFFFF
             {
-                bytes = [VariableLengthIntegerType.UInt32.toRaw()]
+                bytes = [VariableLengthIntegerType.UInt32.rawValue]
             }
             else
             {
-                bytes = [VariableLengthIntegerType.UInt64.toRaw()]
+                bytes = [VariableLengthIntegerType.UInt64.rawValue]
             }
             
             // add the bytes to the array
             var temp = value
             for var i = 0; i < valueSize; ++i
             {
-                bytes.append(Byte(temp & 0xFF))
+                bytes.append(UInt8(temp & 0xFF))
                 temp >>= 8
             }
             

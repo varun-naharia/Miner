@@ -41,11 +41,11 @@ class ResponseParser
                     
                 if dictionaryObject.objectForKey("params") != nil
                 {
-                    parsedResponses.append(RPCRequest(dictionary: dictionaryObject))
+                    parsedResponses.append(RPCRequest(dictionary: dictionaryObject as [NSObject : AnyObject]))
                 }
                 else
                 {
-                    parsedResponses.append(RPCResponse(dictionary: dictionaryObject))
+                    parsedResponses.append(RPCResponse(dictionary: dictionaryObject as [NSObject : AnyObject]))
                 }
             }
             

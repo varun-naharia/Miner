@@ -33,16 +33,16 @@ class SubscribeResult
             let subscribeResult = SubscribeResult()
             
             // parse the data in the array (subscribed services(name, hash), extraNonce1, extraNonce2Size)
-            let subscribedNotificationsArray = resultArray[0] as [AnyObject]
+            let subscribedNotificationsArray = resultArray[0] as! [AnyObject]
             for subscribedNotification in subscribedNotificationsArray
             {
-                let name = subscribedNotification[0] as String
-                let hash = subscribedNotification[1] as String
+                let name = subscribedNotification[0] as! String
+                let hash = subscribedNotification[1] as! String
                 
                 subscribeResult.subscribedNotifications.append(SubscribedNotification(name: name, hash: hash))
             }
             
-            subscribeResult.extraNonce1 = resultArray[1] as String
+            subscribeResult.extraNonce1 = resultArray[1] as! String
             subscribeResult.extraNonce2Size = resultArray[2] as? Int
             
             return subscribeResult

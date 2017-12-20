@@ -33,7 +33,7 @@ class Block : DataObjectProtocol
         rawData.getBytes(&size, range: NSMakeRange(0x4, 0x4))
         
         // assert the magic
-        assert(magic == BLOCK_MAGIC, "Invalid magic")
+        //assert(magic == BLOCK_MAGIC, "Invalid magic")
         
         // parse the block header (0x8 - 0x58)
         let rawHeaderData = NSData(bytes: rawData.bytes.advancedBy(0x8), length: 0x50)

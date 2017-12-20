@@ -23,7 +23,7 @@ class StratumClient : NSObject, NSStreamDelegate
     var host: String
     var port: Int
     
-    private var currentAwaitingRequests = Dictionary<Int, AnyObject>()
+    private var currentAwaitingRequests:[Int:Any] = Dictionary()
     private var inputStream:  NSInputStream?
     private var outputStream: NSOutputStream?
     
@@ -54,7 +54,7 @@ class StratumClient : NSObject, NSStreamDelegate
     func subscribe()
     {
         // create the request, add it to the dictionary
-        let request = RPCRequest(method: StratumMethods.Subscribe.toRaw())
+        let request = RPCRequest(method: StratumMethods.Subscribe.rawValue)
         
         // send the request
         sendRequest(request)
@@ -66,7 +66,7 @@ class StratumClient : NSObject, NSStreamDelegate
         let usernamePasswordArray = [username, password]
         
         // create the request
-        let request = RPCRequest(method: StratumMethods.Authorize.toRaw(), params: usernamePasswordArray)
+        let request = RPCRequest(method: StratumMethods.Authorize.rawValue, params: usernamePasswordArray)
         
         // send the request
         sendRequest(request)
@@ -78,7 +78,7 @@ class StratumClient : NSObject, NSStreamDelegate
         let shareInformationArray = [miner, jobId, extraNonce2, nTime, nonce]
         
         // create the request
-        let request = RPCRequest(method: StratumMethods.Submit.toRaw(), params: shareInformationArray)
+        let request = RPCRequest(method: StratumMethods.Submit.rawValue, params: shareInformationArray)
         
         // send the request
         sendRequest(request)
@@ -101,8 +101,8 @@ class StratumClient : NSObject, NSStreamDelegate
     
     private func sendRequest(request: RPCRequest)
     {
-        currentAwaitingRequests.updateValue(request, forKey: request.id)
-        
+//        currentAwaitingRequests.updateValue(request, forKey: request.id)
+        currentAwaitingRequests[request.id.integerValue] = request
         // get bytes of request's json data
         let dataDictonary = request.serialize()
         let data = NSJSONSerialization.dataWithJSONObject(dataDictonary, options: NSJSONWritingOptions.allZeros, error: nil)
@@ -133,14 +133,14 @@ class StratumClient : NSObject, NSStreamDelegate
                 
             case NSStreamEvent.HasBytesAvailable:
                 // get the input stream
-                let inputStream = stream as NSInputStream
+                let inputStream = stream as! NSInputStream
                 
                 // read a page of data
                 var buffer = NSMutableData(length: 4096)
-                inputStream.read(UnsafeMutablePointer<UInt8>(buffer.mutableBytes), maxLength: 4096)
+                inputStream.read(UnsafeMutablePointer<UInt8>(buffer!.mutableBytes), maxLength: 4096)
 
                 // parse the data (into responses)
-                let responses = ResponseParser.parseResponse(buffer)
+                let responses = ResponseParser.parseResponse(buffer!)
                 
                 // handle them (fire delegate methods)
                 self.handleResponses(responses)
@@ -159,29 +159,29 @@ class StratumClient : NSObject, NSStreamDelegate
         {
             if let responseUnwrapped = response as? RPCResponse
             {
-                if let requestUnwrapped = currentAwaitingRequests[responseUnwrapped.id] as? RPCRequest
+                if let requestUnwrapped = currentAwaitingRequests[responseUnwrapped.id.integerValue] as? RPCRequest
                 {
                     // remove it from awaiting requests
-                    currentAwaitingRequests.removeValueForKey(responseUnwrapped.id)
+                    currentAwaitingRequests.removeValueForKey(responseUnwrapped.id.integerValue)
                     
                     switch requestUnwrapped.method
                     {
-                    case StratumMethods.Subscribe.toRaw():
+                    case StratumMethods.Subscribe.rawValue:
                         // try and parse it as a SubscribeResult
                         if let subscribeResult = SubscribeResult.attemptParseWithResponse(responseUnwrapped)
                         {
                             delegate?.didSubscribe(subscribeResult)
                         }
                         break
-                    case StratumMethods.Authorize.toRaw():
+                    case StratumMethods.Authorize.rawValue:
                         // get the parameters (username/password)
-                        let paramsArray = requestUnwrapped.params as [String]
-                        delegate?.didAuthorize(paramsArray[0], password: paramsArray[1], success: responseUnwrapped.result as Bool)
+                        let paramsArray = requestUnwrapped.params as! [String]
+                        delegate?.didAuthorize(paramsArray[0], password: paramsArray[1], success: responseUnwrapped.result as! Bool)
                         break
-                    case StratumMethods.Submit.toRaw():
+                    case StratumMethods.Submit.rawValue:
                         // get the parameters, check if we succeeded
-                        let paramsArray = requestUnwrapped.params as [String]
-                        let success = responseUnwrapped.error == nil && responseUnwrapped.result as Bool
+                        let paramsArray = requestUnwrapped.params as! [String]
+                        let success = responseUnwrapped.error == nil && responseUnwrapped.result as! Bool
                         
                         delegate?.didSubmitShare(paramsArray[1], success: success)
                         break
