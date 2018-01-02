@@ -36,7 +36,7 @@ class Block : DataObjectProtocol
         //assert(magic == BLOCK_MAGIC, "Invalid magic")
         
         // parse the block header (0x8 - 0x58)
-        let rawHeaderData = NSData(bytes: rawData.bytes.advancedBy(0x8), length: 0x50)
+        let rawHeaderData = NSData(bytes: rawData.bytes.advanced(by: 0x8), length: 0x50)
         header = BlockHeader(rawData: rawHeaderData)
         
         // get the transaction count, increment position
@@ -45,9 +45,9 @@ class Block : DataObjectProtocol
         
         // read all transactions
         let transactionCounterValue = transactionCounter!.value
-        for var i: UInt64 = 0; i < transactionCounterValue; i++
+        for _: UInt64 in 0 ..< transactionCounterValue
         {
-            let transaction = Transaction(rawData: rawData.subdataWithRange(NSMakeRange(currentPosition, rawData.length - currentPosition)))
+            let transaction = Transaction(rawData: rawData.subdata(with: NSMakeRange(currentPosition, rawData.length - currentPosition)) as NSData)
             transactions.append(transaction)
             
             currentPosition += Int(transaction.transactionLength)
@@ -64,14 +64,15 @@ class Block : DataObjectProtocol
         for transaction in transactions
         {
             let transactionRawData = transaction.rawData
-            merkleTree.append(Cryptography.doubleSha256HashData(transactionRawData.bytes, length: UInt32(transactionRawData.length)))
+            merkleTree.append(Cryptography.doubleSha256HashData(transactionRawData.bytes, length: UInt32(transactionRawData.length))! as NSData)
         }
         
         // calculate the rest of the tree
         var j = 0
-        for (var nSize = merkleTree.count; nSize > 1; nSize = (nSize + 1) / 2)
+        var nSize = merkleTree.count
+        while nSize > 1
         {
-            for (var i = 0; i < nSize; i += 2)
+            for i in stride(from: 0, to: nSize, by: 2)
             {
                 var dataToHash: NSData
                 
@@ -98,10 +99,11 @@ class Block : DataObjectProtocol
                 }
                 
                 // hash it, add it to the end of the array
-                merkleTree.append(Cryptography.doubleSha256HashData(dataToHash.bytes, length: UInt32(dataToHash.length)))
+                merkleTree.append(Cryptography.doubleSha256HashData(dataToHash.bytes, length: UInt32(dataToHash.length))! as NSData)
             }
             
             j += nSize;
+            nSize = (nSize + 1) / 2
         }
         
         // return the last element

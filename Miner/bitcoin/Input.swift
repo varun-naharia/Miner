@@ -27,7 +27,7 @@ struct Input : DataObjectProtocol
         
         // get script
         let scriptStartOffset = 0x24 + scriptLength.integerLength
-        script = NSData(bytes: rawData.bytes.advancedBy(scriptStartOffset), length: Int(scriptLength.value))
+        script = NSData(bytes: rawData.bytes.advanced(by: scriptStartOffset), length: Int(scriptLength.value))
         
         // get sequence
         rawData.getBytes(&sequence, range: NSMakeRange(scriptStartOffset + Int(scriptLength.value), 4))

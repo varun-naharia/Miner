@@ -125,7 +125,7 @@ struct VariableLengthInteger : DataObjectProtocol
         get
         {
             var bytes: [UInt8]
-            var valueSize = self.integerLength
+            let valueSize = self.integerLength
             
             // get the first value of the array
             if value < 0xFD
@@ -147,7 +147,7 @@ struct VariableLengthInteger : DataObjectProtocol
             
             // add the bytes to the array
             var temp = value
-            for var i = 0; i < valueSize; ++i
+            for _ in 0..<valueSize //var i = 0; i < valueSize; ++i
             {
                 bytes.append(UInt8(temp & 0xFF))
                 temp >>= 8

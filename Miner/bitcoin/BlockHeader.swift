@@ -26,8 +26,8 @@ struct BlockHeader : DataObjectProtocol
         
         // parse data into block header properties
         rawData.getBytes(&version, range: NSMakeRange(0, 0x4))
-        self.previousBlockHash = NSData(bytes: rawData.bytes.advancedBy(0x4), length: 0x20)
-        self.merkleRootHash = NSData(bytes: rawData.bytes.advancedBy(0x24), length: 0x20)
+        self.previousBlockHash = NSData(bytes: rawData.bytes.advanced(by: 0x4), length: 0x20)
+        self.merkleRootHash = NSData(bytes: rawData.bytes.advanced(by: 0x24), length: 0x20)
         rawData.getBytes(&timestamp, range: NSMakeRange(0x44, 0x4))
         rawData.getBytes(&bits, range: NSMakeRange(0x48, 0x4))
         rawData.getBytes(&nonce, range: NSMakeRange(0x4C, 0x4))

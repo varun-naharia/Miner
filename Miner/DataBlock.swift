@@ -19,32 +19,32 @@ class DataBlock : DataObjectProtocol
         addSegment(rawData)
     }
     
-    func addSegment(data: NSData)
+    func addSegment(_ data: NSData)
     {
         dataSegments.append(DataBlockSegment(data: data))
     }
     
-    func addSegment(dataObject: DataObjectProtocol)
+    func addSegment(_ dataObject: DataObjectProtocol)
     {
         dataSegments.append(DataBlockSegment(dataObject: dataObject))
     }
     
-    func addSegment(unsignedInt: UInt32)
+    func addSegment(_ unsignedInt: UInt32)
     {
         dataSegments.append(DataBlockSegment(unsignedInt32: unsignedInt))
     }
     
-    func addSegment(signedInt: Int32)
+    func addSegment(_ signedInt: Int32)
     {
         dataSegments.append(DataBlockSegment(signedInt32: signedInt))
     }
     
-    func addSegment(unsignedInt: UInt64)
+    func addSegment(_ unsignedInt: UInt64)
     {
         dataSegments.append(DataBlockSegment(unsignedInt64: unsignedInt))
     }
     
-    func addSegment(signedInt: Int64)
+    func addSegment(_ signedInt: Int64)
     {
         dataSegments.append(DataBlockSegment(signedInt64: signedInt))
     }
@@ -80,7 +80,7 @@ class DataBlock : DataObjectProtocol
             }
             
             // construct the data
-            var data = NSMutableData(length: dataLength)
+            let data = NSMutableData(length: dataLength)
             var currentDataIndex = 0
             var currentOffset = 0
             for dataSegment in dataSegments
@@ -88,24 +88,25 @@ class DataBlock : DataObjectProtocol
                 switch dataSegment.type
                     {
                 case DataBlockSegmentType.SignedInt32:
-                    data!.replaceBytesInRange(NSMakeRange(currentOffset, 0x4), withBytes: UnsafePointer<Int32>([dataSegment.signedInt32]))
+                    data!.replaceBytes(in: NSMakeRange(currentOffset, 0x4), withBytes: UnsafePointer<Int32>([dataSegment.signedInt32]))
                     currentOffset += 0x4
                     break
                 case DataBlockSegmentType.UnsignedInt32:
-                    data!.replaceBytesInRange(NSMakeRange(currentOffset, 0x4), withBytes: UnsafePointer<UInt32>([dataSegment.unsignedInt32]))
+                    data!.replaceBytes(in: NSMakeRange(currentOffset, 0x4), withBytes: UnsafePointer<UInt32>([dataSegment.unsignedInt32]))
                     currentOffset += 0x4
                     break
                 case DataBlockSegmentType.SignedInt64:
-                    data!.replaceBytesInRange(NSMakeRange(currentOffset, 0x8), withBytes: UnsafePointer<Int64>([dataSegment.signedInt64]))
+                    data!.replaceBytes(in: NSMakeRange(currentOffset, 0x8), withBytes: UnsafePointer<Int64>([dataSegment.signedInt64]))
                     currentOffset += 0x8
                     break
                 case DataBlockSegmentType.UnsignedInt64:
-                    data!.replaceBytesInRange(NSMakeRange(currentOffset, 0x8), withBytes: UnsafePointer<UInt64>([dataSegment.unsignedInt64]))
+                    data!.replaceBytes(in: NSMakeRange(currentOffset, 0x8), withBytes: UnsafePointer<UInt64>([dataSegment.unsignedInt64]))
                     currentOffset += 0x8
                     break
                 case DataBlockSegmentType.Data, DataBlockSegmentType.DataObject:
-                    let rawData = rawDataBlocks[currentDataIndex++]
-                    data!.replaceBytesInRange(NSMakeRange(currentOffset, rawData.length), withBytes: rawData.bytes)
+                    let rawData = rawDataBlocks[currentDataIndex]
+                    currentDataIndex += 1
+                    data!.replaceBytes(in: NSMakeRange(currentOffset, rawData.length), withBytes: rawData.bytes)
                     currentOffset += rawData.length
                     break
                 }

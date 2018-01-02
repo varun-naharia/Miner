@@ -22,7 +22,7 @@ class SubscribeResult
     
     class func attemptParseWithResponse(response: RPCResponse) -> SubscribeResult?
     {
-        if let resultArray = response.result as? [AnyObject]
+        if let resultArray = response.result as? [Any]
         {
             // if the array count != 3, then it cannot be a subscribe result
             if resultArray.count != 3
@@ -33,11 +33,11 @@ class SubscribeResult
             let subscribeResult = SubscribeResult()
             
             // parse the data in the array (subscribed services(name, hash), extraNonce1, extraNonce2Size)
-            let subscribedNotificationsArray = resultArray[0] as! [AnyObject]
+            let subscribedNotificationsArray = resultArray[0] as! [Any]
             for subscribedNotification in subscribedNotificationsArray
             {
-                let name = subscribedNotification[0] as! String
-                let hash = subscribedNotification[1] as! String
+                let name = (subscribedNotification as! [Any])[0] as! String
+                let hash = (subscribedNotification as! [Any])[1] as! String
                 
                 subscribeResult.subscribedNotifications.append(SubscribedNotification(name: name, hash: hash))
             }

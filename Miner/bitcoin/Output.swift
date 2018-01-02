@@ -21,7 +21,7 @@ struct Output : DataObjectProtocol
         
         // get script length and script data
         scriptLength = VariableLengthInteger(data: rawData, index: 0x8)
-        script = NSData(bytes: rawData.bytes.advancedBy(0x8 + scriptLength.integerLength), length: Int(scriptLength.value))
+        script = NSData(bytes: rawData.bytes.advanced(by: 0x8 + scriptLength.integerLength), length: Int(scriptLength.value))
     }
     
     var outputLength: UInt64

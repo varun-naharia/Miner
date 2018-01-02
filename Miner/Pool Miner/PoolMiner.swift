@@ -26,7 +26,7 @@ class PoolMiner : StartumClientProtocol
     
     func authorizeUser(username: String, password: String)
     {
-        client.authorizeWorker(username, password: password)
+        client.authorizeWorker(username: username, password: password)
     }
     
     func didRecieveNewJob(job: JobParameters)
@@ -43,7 +43,7 @@ class PoolMiner : StartumClientProtocol
         }
         
         // start mining
-        startMining(job)
+        startMining(job: job)
     }
     
     func didSubscribe(result: SubscribeResult)
@@ -53,7 +53,7 @@ class PoolMiner : StartumClientProtocol
         #endif
         
         subscribeResult = result
-        client.authorizeWorker("hetelek.worker1", password: "123")
+        client.authorizeWorker(username: "hetelek.worker1", password: "123")
     }
     
     func didAuthorize(username: String, password: String, success: Bool)
@@ -66,7 +66,7 @@ class PoolMiner : StartumClientProtocol
     func didSubmitShare(jobId: String, success: Bool)
     {
         #if DEBUG
-        println("didSubmitShare - \(jobId), \(success)")
+        print("didSubmitShare - \(jobId), \(success)")
         #endif
     }
     
@@ -83,7 +83,7 @@ class PoolMiner : StartumClientProtocol
             var extraNonce2: UInt32 = 0
             
             // mining loop
-            do
+            repeat
             {
                 // cancel the mining job if requested
                 if self.cancelMining
@@ -98,13 +98,13 @@ class PoolMiner : StartumClientProtocol
                 
                 // create coinbase, hash it
                 let coinbase = NSData(hexString: job.coinb1 + subscribeResultUnwrapped.extraNonce1 + extraNonce2String + job.coinb2)
-                let coinbaseHash = Cryptography.doubleSha256HashData(coinbase.bytes, length: UInt32(coinbase.length))
+                let coinbaseHash = Cryptography.doubleSha256HashData(coinbase?.bytes, length: UInt32(coinbase!.length))
             
                 // calculate merkle root
                 var merkleRoot = coinbaseHash
                 for h in job.merkleBranch
                 {
-                    let merkleRootDataBlock = DataBlock(rawData: merkleRoot)
+                    let merkleRootDataBlock = DataBlock(rawData: merkleRoot! as NSData)
                     merkleRootDataBlock.addSegment(NSData(hexString: h))
                     let data = merkleRootDataBlock.rawData
                     
@@ -113,16 +113,16 @@ class PoolMiner : StartumClientProtocol
                 
                 // create block header
                 let blockHeaderDataBlock = DataBlock()
-                blockHeaderDataBlock.addSegment(NSData(hexString: job.version).reverse())
-                blockHeaderDataBlock.addSegment(NSData(hexString: job.previousHash).reverseInChunks(4))
-                blockHeaderDataBlock.addSegment(merkleRoot)
-                blockHeaderDataBlock.addSegment(NSData(hexString: job.ntime).reverse())
-                blockHeaderDataBlock.addSegment(NSData(hexString: job.nbits).reverse())
+                blockHeaderDataBlock.addSegment(NSData(hexString: job.version).reverse()! as NSData)
+                blockHeaderDataBlock.addSegment(NSData(hexString: job.previousHash).reverse(inChunks: 4)! as NSData)
+                blockHeaderDataBlock.addSegment(merkleRoot! as NSData)
+                blockHeaderDataBlock.addSegment(NSData(hexString: job.ntime).reverse()! as NSData)
+                blockHeaderDataBlock.addSegment(NSData(hexString: job.nbits).reverse()! as NSData)
                 blockHeaderDataBlock.addSegment(NSData(hexString: "00000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000080020000"))
                 
                 // get the raw data, hash it
                 let blockHeaderRawData = blockHeaderDataBlock.rawData
-                let hash = Cryptography.doubleSha256HashData(blockHeaderRawData.bytes, length: UInt32(blockHeaderRawData.length))
+                let hash = Cryptography.doubleSha256HashData(blockHeaderRawData.bytes, length: UInt32(blockHeaderRawData.length))! as NSData
             
                 #if DEBUG
                 println("coinbase: \(coinbase)")
@@ -133,34 +133,35 @@ class PoolMiner : StartumClientProtocol
                 #endif
                 
                 // see if the block header meets difficulty
-                var leading = hash.rangeOfData(NSData(bytes: [0, 0, 0, 0] as [UInt8], length: 4), options: NSDataSearchOptions.Anchored, range: NSMakeRange(0, hash.length)).length != 0
-                var trailing = hash.rangeOfData(NSData(bytes: [0, 0, 0, 0] as [UInt8], length: 4), options: NSDataSearchOptions.Anchored | NSDataSearchOptions.Backwards, range: NSMakeRange(0, hash.length)).length != 0
+                let leading = hash.range(of: NSData(bytes: [0, 0, 0, 0] as [UInt8], length: 4) as Data, options: NSData.SearchOptions.anchored, in: NSMakeRange(0, hash.length)).length != 0
+                let trailing = hash.range(of: NSData(bytes: [0, 0, 0, 0] as [UInt8], length: 4) as Data, options: NSData.SearchOptions(rawValue: NSData.SearchOptions.RawValue(UInt8(NSData.SearchOptions.anchored.rawValue) | UInt8(NSData.SearchOptions.backwards.rawValue))), in: NSMakeRange(0, hash.length)).length != 0
                 if leading || trailing
                 {
                     // if so, print the has and submit it
-                    println(hash)
-                    client.submiteShare("hetelek.worker1", jobId: job.jobId, extraNonce2: String(format: "%08x", extraNonce2), nTime: job.ntime, nonce: subscribeResultUnwrapped.extraNonce1)
+                    print(hash)
+                    client.submiteShare(miner: "hetelek.worker1", jobId: job.jobId, extraNonce2: String(format: "%08x", extraNonce2), nTime: job.ntime, nonce: subscribeResultUnwrapped.extraNonce1)
                 }
                 
                 // increment the amount of hashes we've done
-                ++hashesDone
+                hashesDone += 1
                 
                 // get the time it's been since last calculated
-                let interval = NSDate().timeIntervalSinceDate(lastTime)
+                let interval = NSDate().timeIntervalSince(lastTime as Date)
                 if interval > 10
                 {
                     // if greate than 10 seconds, recalculate
-                    var hashesPerSecond = hashesDone / interval
-                    println("hashes per second: \(hashesPerSecond)")
+                    let hashesPerSecond = hashesDone / interval
+                    print("hashes per second: \(hashesPerSecond)")
                     
                     // reset hashes done and the last calculated time
                     hashesDone = 0
                     lastTime = NSDate()
                 }
+                extraNonce2 += 1
             }
-            while ++extraNonce2 < 0xFFFFFFFF
+            while extraNonce2 < 0xFFFFFFFF
         }
         
-        println("not solved...")
+        print("not solved...")
     }
 }

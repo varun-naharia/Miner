@@ -27,9 +27,9 @@ class Transaction : DataObjectProtocol
         var currentPosition = 0x4 + inputCount!.integerLength
         
         let inputCountValue = inputCount!.value
-        for var i: UInt64 = 0; i < inputCountValue; i++
+        for _ in 0 ..< inputCountValue
         {
-            let input = Input(rawData: rawData.subdataWithRange(NSMakeRange(currentPosition, rawData.length - currentPosition)))
+            let input = Input(rawData: rawData.subdata(with: NSMakeRange(currentPosition, rawData.length - currentPosition)) as NSData)
             inputs.append(input)
             
             currentPosition += Int(input.inputLength)
@@ -40,9 +40,9 @@ class Transaction : DataObjectProtocol
         currentPosition += outputCount!.integerLength
         
         let outputCountValue = outputCount!.value
-        for var i: UInt64 = 0; i < outputCountValue; i++
+        for _ in 0..<outputCountValue
         {
-            let output = Output(rawData: rawData.subdataWithRange(NSMakeRange(currentPosition, rawData.length - currentPosition)))
+            let output = Output(rawData: rawData.subdata(with: NSMakeRange(currentPosition, rawData.length - currentPosition)) as NSData)
             outputs.append(output)
             
             currentPosition += Int(output.outputLength)
