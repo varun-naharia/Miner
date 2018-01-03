@@ -143,6 +143,7 @@ class StratumClient : NSObject, StreamDelegate
                 let inputStream = stream as! InputStream
                 
                 // read a page of data
+                // MARK: - TODO Fix Below Code
                 var buffer = Data(capacity: 4096)
                 buffer.withUnsafeMutableBytes({ (mutableBytes:UnsafeMutablePointer<UInt8>) -> Void in
                     inputStream.read(mutableBytes, maxLength: 4096)
